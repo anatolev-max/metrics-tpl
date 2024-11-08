@@ -22,7 +22,7 @@ func TestMemStorage_UpdateAgentData(t *testing.T) {
 	assert.Equal(t, int(s.Counter[config.PollCounter]), gaugeCount)
 }
 
-func TestMemStorage_UpdateServerData(t *testing.T) {
+func TestMemStorage_UpdateMetricValue(t *testing.T) {
 	testCases := []struct {
 		name        string
 		metricName  string
@@ -41,7 +41,7 @@ func TestMemStorage_UpdateServerData(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		updateCount := 3
+		const updateCount int = 3
 		s := NewMemStorage()
 
 		t.Run(tc.name, func(t *testing.T) {
@@ -49,13 +49,13 @@ func TestMemStorage_UpdateServerData(t *testing.T) {
 			case reflect.Int:
 				convertedValue := int64(tc.metricValue.(int))
 				for i := 1; i <= updateCount; i++ {
-					s.UpdateServerData(tc.metricName, convertedValue)
+					s.UpdateMetricValue(tc.metricName, convertedValue)
 					assert.Equal(t, convertedValue*int64(i), s.Counter[tc.metricName])
 				}
 			case reflect.Float64:
 				for i := 0; i < updateCount; i++ {
 					convertedValue := tc.metricValue.(float64) + float64(i)
-					s.UpdateServerData(tc.metricName, convertedValue)
+					s.UpdateMetricValue(tc.metricName, convertedValue)
 					assert.Equal(t, convertedValue, s.Gauge[tc.metricName])
 				}
 			default:

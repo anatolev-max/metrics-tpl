@@ -65,7 +65,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 	}
 }
 
-func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			res.WriteHeader(http.StatusMethodNotAllowed)
@@ -111,6 +111,6 @@ func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Req
 
 		res.Header().Set("Content-Type", config.TextPlain)
 		res.WriteHeader(http.StatusOK)
-		ms.UpdateServerData(metricName, convMetricValue)
+		s.UpdateMetricValue(metricName, convMetricValue)
 	}
 }

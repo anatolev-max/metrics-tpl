@@ -34,13 +34,13 @@ func run() error {
 	}
 }
 
-func updateServerData(ms storage.MemStorage) {
-	msVal := reflect.ValueOf(ms)
+func updateServerData(s storage.MemStorage) {
+	sValue := reflect.ValueOf(s)
 
-	for fieldIndex := 0; fieldIndex < msVal.NumField(); fieldIndex++ {
-		metricType := msVal.Type().Field(fieldIndex).Name
+	for fieldIndex := 0; fieldIndex < sValue.NumField(); fieldIndex++ {
+		metricType := sValue.Type().Field(fieldIndex).Name
 
-		iter := msVal.FieldByName(metricType).MapRange()
+		iter := sValue.FieldByName(metricType).MapRange()
 		for iter.Next() {
 			metricType = strings.ToLower(metricType)
 			url := fmt.Sprintf(config.UpdateFullEndpoint+"%v/%v/%v", metricType, iter.Key(), iter.Value())

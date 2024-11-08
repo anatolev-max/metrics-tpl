@@ -17,7 +17,7 @@ func IncludeTemplate(path string, data map[string]any) func(res http.ResponseWri
 	const basePath = "./web/templates/"
 
 	return func(res http.ResponseWriter, req *http.Request) {
-		tLayout, err := template.ParseFiles(basePath + "layout.html")
+		tLayout, err := template.ParseFiles(basePath + "layout/main.html")
 		check("Error while parsing layout file: %v", err)
 
 		buffer := new(bytes.Buffer)

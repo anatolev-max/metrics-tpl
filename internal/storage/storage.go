@@ -44,7 +44,7 @@ type Metrics struct {
 
 type Storage interface {
 	UpdateAgentData()
-	UpdateServerData(name string, value interface{})
+	UpdateMetricValue(name string, value any)
 }
 
 type MemStorage struct {
@@ -63,45 +63,43 @@ func NewMemStorage() MemStorage {
 	}
 }
 
-func (ms *MemStorage) UpdateAgentData() {
+func (s *MemStorage) UpdateAgentData() {
 	rtm := runtime.MemStats{}
 	runtime.ReadMemStats(&rtm)
 
 	gauges := Metrics{}.Gauges
-	val := reflect.ValueOf(gauges)
+	gaugesValue := reflect.ValueOf(gauges)
 
-	if val.Kind() == reflect.Struct {
-		for fieldIndex := 0; fieldIndex < val.NumField(); fieldIndex++ {
-			name := val.Type().Field(fieldIndex).Name
-			value := reflect.ValueOf(rtm).FieldByName(name)
+	for fieldIndex := 0; fieldIndex < gaugesValue.NumField(); fieldIndex++ {
+		name := gaugesValue.Type().Field(fieldIndex).Name
+		value := reflect.ValueOf(rtm).FieldByName(name)
 
-			if value.IsValid() {
-				switch vv := value.Interface().(type) {
-				case uint64:
-					ms.Gauge[name] = float64(vv)
-				case uint32:
-					ms.Gauge[name] = float64(vv)
-				case float64:
-					ms.Gauge[name] = vv
-				}
-
-				ms.Counter[config.PollCounter]++
+		if value.IsValid() {
+			switch vType := value.Interface().(type) {
+			case uint64:
+				s.Gauge[name] = float64(vType)
+			case uint32:
+				s.Gauge[name] = float64(vType)
+			case float64:
+				s.Gauge[name] = vType
 			}
-		}
 
-		ms.Gauge[config.RandomValue] = rand.Float64()
+			s.Counter[config.PollCounter]++
+		}
 	}
+
+	s.Gauge[config.RandomValue] = rand.Float64()
 }
 
-func (ms *MemStorage) UpdateServerData(name string, value interface{}) {
+func (s *MemStorage) UpdateMetricValue(name string, value any) {
 	switch vType := value.(type) {
 	case int64:
-		if _, exist := ms.Counter[name]; !exist || name == config.PollCounter {
-			ms.Counter[name] = vType
+		if _, exist := s.Counter[name]; !exist || name == config.PollCounter {
+			s.Counter[name] = vType
 		} else {
-			ms.Counter[name] += vType
+			s.Counter[name] += vType
 		}
 	case float64:
-		ms.Gauge[name] = vType
+		s.Gauge[name] = vType
 	}
 }
