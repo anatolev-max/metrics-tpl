@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"html/template"
+	"github.com/anatolev-max/metrics-tpl/internal/render"
 	"net/http"
 	"reflect"
 	"slices"
@@ -14,40 +14,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func GetMainWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Request) {
-	return func(res http.ResponseWriter, req *http.Request) {
-		data := struct {
-			Title    string
-			Counters map[string]int64
-			Gauges   map[string]float64
-		}{
-			Title:    "Metrics-tpl",
-			Counters: ms.Counter,
-			Gauges:   ms.Gauge,
-		}
-
-		tmpl := template.Must(template.New("data").Parse(`<div>
-				<h1>{{ .Title}}</h1>
-			  	<ul>
-					{{range $k, $v := .Counters}}
-						<li>{{ $k }} - {{ $v }}</li>
-					{{end}}
-				</ul>
-				<ul>
-					{{range $k, $v := .Gauges}}
-						<li>{{ $k }} - {{ $v }}</li>
-					{{end}}
-				</ul>
-			</div>`))
-
-		err := tmpl.Execute(res, data)
-		if err != nil {
-			panic(err)
-		}
-	}
+func GetMainWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+	return render.IncludeTemplate("index.html", map[string]any{
+		"Title":    "Metrics-tpl",
+		"Counters": s.Counter,
+		"Gauges":   s.Gauge,
+	})
 }
 
-func GetValueWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet {
 			res.WriteHeader(http.StatusMethodNotAllowed)
@@ -64,7 +39,7 @@ func GetValueWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Requ
 			return
 		}
 
-		msVal := reflect.ValueOf(ms)
+		msVal := reflect.ValueOf(s)
 
 		for fieldIndex := 0; fieldIndex < msVal.NumField(); fieldIndex++ {
 			if field := msVal.Type().Field(fieldIndex).Name; strings.ToLower(field) == metricType {

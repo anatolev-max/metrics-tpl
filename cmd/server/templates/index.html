@@ -1,0 +1,15 @@
+<section>
+    <div class="container">
+        <h1>{{ .Title}}</h1>
+        <ul>
+            {{range $k, $v := .Counters}}
+            <li>{{ $k }} - {{ $v }}</li>
+            {{end}}
+        </ul>
+        <ul>
+            {{range $k, $v := .Gauges}}
+            <li>{{ $k }} - {{ $v }}</li>
+            {{end}}
+        </ul>
+    </div>
+</section>
