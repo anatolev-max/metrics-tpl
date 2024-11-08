@@ -14,7 +14,7 @@ func check(fMessage string, err error) {
 }
 
 func IncludeTemplate(path string, data map[string]any) func(res http.ResponseWriter, req *http.Request) {
-	const basePath = "./cmd/server/templates/"
+	const basePath = "./web/templates/"
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		tLayout, err := template.ParseFiles(basePath + "layout.html")
