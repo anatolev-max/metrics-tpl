@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/anatolev-max/metrics-tpl/cmd/common"
-	"github.com/anatolev-max/metrics-tpl/cmd/storage"
+	"github.com/anatolev-max/metrics-tpl/internal/config"
+	"github.com/anatolev-max/metrics-tpl/internal/storage"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -58,7 +58,7 @@ func GetValueWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Requ
 		metricType := strings.ToLower(chi.URLParam(req, "type"))
 		metricName := strings.ToLower(chi.URLParam(req, "name"))
 
-		supportedMTypes := []string{common.Counter, common.Gauge}
+		supportedMTypes := []string{config.Counter, config.Gauge}
 		if !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
@@ -82,7 +82,7 @@ func GetValueWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Requ
 			return
 		}
 
-		res.Header().Set("Content-Type", common.TextPlain)
+		res.Header().Set("Content-Type", config.TextPlain)
 		res.WriteHeader(http.StatusOK)
 		if _, err := res.Write(data); err != nil {
 			panic(err)
@@ -98,7 +98,7 @@ func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Req
 		}
 
 		// TODO: chi.URLParam
-		urlPath := strings.TrimLeft(req.RequestURI, common.ServerHost+common.ServerPort)
+		urlPath := strings.TrimLeft(req.RequestURI, config.ServerHost+config.ServerPort)
 		urlParams := strings.Split(urlPath, "/")
 		if len(urlParams) != 4 {
 			return
@@ -113,8 +113,8 @@ func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Req
 			return
 		}
 
-		supportedMTypes := []string{common.Counter, common.Gauge}
-		if req.Header.Get("Content-Type") != common.TextPlain || !slices.Contains(supportedMTypes, metricType) {
+		supportedMTypes := []string{config.Counter, config.Gauge}
+		if req.Header.Get("Content-Type") != config.TextPlain || !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -123,9 +123,9 @@ func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Req
 		var err error
 
 		switch metricType {
-		case common.Counter:
+		case config.Counter:
 			convMetricValue, err = strconv.ParseInt(metricValue, 0, 64)
-		case common.Gauge:
+		case config.Gauge:
 			convMetricValue, err = strconv.ParseFloat(metricValue, 64)
 		}
 
@@ -134,7 +134,7 @@ func GetUpdateWebhook(ms storage.MemStorage) func(http.ResponseWriter, *http.Req
 			return
 		}
 
-		res.Header().Set("Content-Type", common.TextPlain)
+		res.Header().Set("Content-Type", config.TextPlain)
 		res.WriteHeader(http.StatusOK)
 		ms.UpdateServerData(metricName, convMetricValue)
 	}

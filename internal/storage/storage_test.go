@@ -4,22 +4,22 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/anatolev-max/metrics-tpl/cmd/common"
+	"github.com/anatolev-max/metrics-tpl/internal/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMemStorage_UpdateAgentData(t *testing.T) {
 	const myGaugeCount int = 1
 
-	ms := NewMemStorage()
-	assert.Equal(t, len(ms.Gauge), myGaugeCount)
+	s := NewMemStorage()
+	assert.Equal(t, len(s.Gauge), myGaugeCount)
 	gaugeCount := reflect.ValueOf(Metrics{}.Gauges).NumField()
 
-	ms.UpdateAgentData()
-	storageGaugeCount := len(ms.Gauge)
+	s.UpdateAgentData()
+	storageGaugeCount := len(s.Gauge)
 
 	assert.Equal(t, storageGaugeCount, gaugeCount+myGaugeCount)
-	assert.Equal(t, int(ms.Counter[common.PollCounter]), gaugeCount)
+	assert.Equal(t, int(s.Counter[config.PollCounter]), gaugeCount)
 }
 
 func TestMemStorage_UpdateServerData(t *testing.T) {
@@ -42,21 +42,21 @@ func TestMemStorage_UpdateServerData(t *testing.T) {
 
 	for _, tc := range testCases {
 		updateCount := 3
-		ms := NewMemStorage()
+		s := NewMemStorage()
 
 		t.Run(tc.name, func(t *testing.T) {
 			switch reflect.ValueOf(tc.metricValue).Kind() {
 			case reflect.Int:
 				convertedValue := int64(tc.metricValue.(int))
 				for i := 1; i <= updateCount; i++ {
-					ms.UpdateServerData(tc.metricName, convertedValue)
-					assert.Equal(t, convertedValue*int64(i), ms.Counter[tc.metricName])
+					s.UpdateServerData(tc.metricName, convertedValue)
+					assert.Equal(t, convertedValue*int64(i), s.Counter[tc.metricName])
 				}
 			case reflect.Float64:
 				for i := 0; i < updateCount; i++ {
 					convertedValue := tc.metricValue.(float64) + float64(i)
-					ms.UpdateServerData(tc.metricName, convertedValue)
-					assert.Equal(t, convertedValue, ms.Gauge[tc.metricName])
+					s.UpdateServerData(tc.metricName, convertedValue)
+					assert.Equal(t, convertedValue, s.Gauge[tc.metricName])
 				}
 			default:
 			}

@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/anatolev-max/metrics-tpl/cmd/common"
-	"github.com/anatolev-max/metrics-tpl/cmd/storage"
+	"github.com/anatolev-max/metrics-tpl/internal/config"
+	"github.com/anatolev-max/metrics-tpl/internal/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,8 +26,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #1 - ok Counter",
 			method:       http.MethodPost,
 			expectedCode: http.StatusOK,
-			contentType:  common.TextPlain,
-			metricType:   common.Counter,
+			contentType:  config.TextPlain,
+			metricType:   config.Counter,
 			metricName:   "Go",
 			metricValue:  123,
 		},
@@ -35,8 +35,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #2 - ok Gauge",
 			method:       http.MethodPost,
 			expectedCode: http.StatusOK,
-			contentType:  common.TextPlain,
-			metricType:   common.Gauge,
+			contentType:  config.TextPlain,
+			metricType:   config.Gauge,
 			metricName:   "Go",
 			metricValue:  123.1,
 		},
@@ -44,8 +44,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #3 - unsupported method",
 			method:       http.MethodGet,
 			expectedCode: http.StatusMethodNotAllowed,
-			contentType:  common.TextPlain,
-			metricType:   common.Counter,
+			contentType:  config.TextPlain,
+			metricType:   config.Counter,
 			metricName:   "Go",
 			metricValue:  123,
 		},
@@ -53,8 +53,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #4 - unsupported Content-Type",
 			method:       http.MethodPost,
 			expectedCode: http.StatusBadRequest,
-			contentType:  common.ApplicationJson,
-			metricType:   common.Counter,
+			contentType:  config.ApplicationJson,
+			metricType:   config.Counter,
 			metricName:   "Go",
 			metricValue:  123,
 		},
@@ -62,8 +62,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #5 - without metricName",
 			method:       http.MethodPost,
 			expectedCode: http.StatusNotFound,
-			contentType:  common.TextPlain,
-			metricType:   common.Counter,
+			contentType:  config.TextPlain,
+			metricType:   config.Counter,
 			metricName:   "",
 			metricValue:  123,
 		},
@@ -71,7 +71,7 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #6 - unsupported metricType",
 			method:       http.MethodPost,
 			expectedCode: http.StatusBadRequest,
-			contentType:  common.TextPlain,
+			contentType:  config.TextPlain,
 			metricType:   "Golang",
 			metricName:   "Go",
 			metricValue:  123,
@@ -80,8 +80,8 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #6 - unsupported metricValue fot Counter",
 			method:       http.MethodPost,
 			expectedCode: http.StatusBadRequest,
-			contentType:  common.TextPlain,
-			metricType:   common.Counter,
+			contentType:  config.TextPlain,
+			metricType:   config.Counter,
 			metricName:   "Go",
 			metricValue:  123.1,
 		},
@@ -89,19 +89,19 @@ func TestGetWebHook(t *testing.T) {
 			name:         "test #7 - unsupported metricValue fot Gauge",
 			method:       http.MethodPost,
 			expectedCode: http.StatusBadRequest,
-			contentType:  common.TextPlain,
-			metricType:   common.Gauge,
+			contentType:  config.TextPlain,
+			metricType:   config.Gauge,
 			metricName:   "Go",
 			metricValue:  "Golang",
 		},
 	}
 
 	for _, tc := range testCases {
-		ms := storage.NewMemStorage()
+		s := storage.NewMemStorage()
 
 		t.Run(tc.name, func(t *testing.T) {
 			var url string
-			urlPattern := common.UpdateFullEndpoint + "%v/%v/%v"
+			urlPattern := config.UpdateFullEndpoint + "%v/%v/%v"
 
 			if reflect.ValueOf(tc.metricValue).Kind() == reflect.Int {
 				url = fmt.Sprintf(urlPattern, tc.metricType, tc.metricName, int64(tc.metricValue.(int)))
@@ -113,7 +113,7 @@ func TestGetWebHook(t *testing.T) {
 			request.Header.Add("Content-Type", tc.contentType)
 			writer := httptest.NewRecorder()
 
-			handler := GetUpdateWebhook(ms)
+			handler := GetUpdateWebhook(s)
 			handler(writer, request)
 
 			assert.Equal(t, tc.expectedCode, writer.Code, "The response code does not match what is expected")

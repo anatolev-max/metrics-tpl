@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/anatolev-max/metrics-tpl/cmd/common"
+	"github.com/anatolev-max/metrics-tpl/internal/config"
 )
 
 type Metrics struct {
@@ -55,10 +55,10 @@ type MemStorage struct {
 func NewMemStorage() MemStorage {
 	return MemStorage{
 		Counter: map[string]int64{
-			common.PollCounter: 0,
+			config.PollCounter: 0,
 		},
 		Gauge: map[string]float64{
-			common.RandomValue: 0,
+			config.RandomValue: 0,
 		},
 	}
 }
@@ -85,23 +85,23 @@ func (ms *MemStorage) UpdateAgentData() {
 					ms.Gauge[name] = vv
 				}
 
-				ms.Counter[common.PollCounter]++
+				ms.Counter[config.PollCounter]++
 			}
 		}
 
-		ms.Gauge[common.RandomValue] = rand.Float64()
+		ms.Gauge[config.RandomValue] = rand.Float64()
 	}
 }
 
 func (ms *MemStorage) UpdateServerData(name string, value interface{}) {
-	switch vv := value.(type) {
+	switch vType := value.(type) {
 	case int64:
-		if _, exist := ms.Counter[name]; !exist || name == common.PollCounter {
-			ms.Counter[name] = vv
+		if _, exist := ms.Counter[name]; !exist || name == config.PollCounter {
+			ms.Counter[name] = vType
 		} else {
-			ms.Counter[name] += vv
+			ms.Counter[name] += vType
 		}
 	case float64:
-		ms.Gauge[name] = vv
+		ms.Gauge[name] = vType
 	}
 }

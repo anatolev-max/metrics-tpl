@@ -1,4 +1,4 @@
-package common
+package config
 
 // CounterType
 const Counter string = "counter"

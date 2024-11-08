@@ -1,4 +1,4 @@
-package common
+package config
 
 const ServerHost string = "http://localhost"
 const ServerPort string = ":8080"

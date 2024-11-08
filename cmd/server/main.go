@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/anatolev-max/metrics-tpl/cmd/common"
-	"github.com/anatolev-max/metrics-tpl/cmd/handlers"
-	"github.com/anatolev-max/metrics-tpl/cmd/storage"
+	"github.com/anatolev-max/metrics-tpl/internal/config"
+	"github.com/anatolev-max/metrics-tpl/internal/handlers"
+	"github.com/anatolev-max/metrics-tpl/internal/storage"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -16,14 +16,14 @@ func main() {
 }
 
 func run() error {
-	memStorage := storage.NewMemStorage()
+	s := storage.NewMemStorage()
 
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
-		router.Get("/", handlers.GetMainWebhook(memStorage))
-		router.Get(common.GetEndpoint+"/{type}/{name}", handlers.GetValueWebhook(memStorage))
-		router.Post(common.UpdateEndpoint+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(memStorage))
+		router.Get("/", handlers.GetMainWebhook(s))
+		router.Get(config.GetEndpoint+"/{type}/{name}", handlers.GetValueWebhook(s))
+		router.Post(config.UpdateEndpoint+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(s))
 	})
 
-	return http.ListenAndServe(common.ServerPort, router)
+	return http.ListenAndServe(config.ServerPort, router)
 }
