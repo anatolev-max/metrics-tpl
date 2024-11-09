@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/anatolev-max/metrics-tpl/internal/config"
+	"github.com/anatolev-max/metrics-tpl/internal/enum"
 )
 
 type Metrics struct {
@@ -55,10 +55,10 @@ type MemStorage struct {
 func NewMemStorage() MemStorage {
 	return MemStorage{
 		Counter: map[string]int64{
-			config.PollCounter: 0,
+			enum.PollCounter: 0,
 		},
 		Gauge: map[string]float64{
-			config.RandomValue: 0,
+			enum.RandomValue: 0,
 		},
 	}
 }
@@ -84,17 +84,17 @@ func (s *MemStorage) UpdateAgentData() {
 				s.Gauge[name] = vType
 			}
 
-			s.Counter[config.PollCounter]++
+			s.Counter[enum.PollCounter]++
 		}
 	}
 
-	s.Gauge[config.RandomValue] = rand.Float64()
+	s.Gauge[enum.RandomValue] = rand.Float64()
 }
 
 func (s *MemStorage) UpdateMetricValue(name string, value any) {
 	switch vType := value.(type) {
 	case int64:
-		if _, exist := s.Counter[name]; !exist || name == config.PollCounter {
+		if _, exist := s.Counter[name]; !exist || name == enum.PollCounter {
 			s.Counter[name] = vType
 		} else {
 			s.Counter[name] += vType

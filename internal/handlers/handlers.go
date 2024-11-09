@@ -2,15 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/anatolev-max/metrics-tpl/internal/render"
 	"net/http"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/anatolev-max/metrics-tpl/internal/config"
+	. "github.com/anatolev-max/metrics-tpl/config"
+	"github.com/anatolev-max/metrics-tpl/internal/enum"
+	"github.com/anatolev-max/metrics-tpl/internal/render"
 	"github.com/anatolev-max/metrics-tpl/internal/storage"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -33,7 +35,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 		metricType := strings.ToLower(chi.URLParam(req, "type"))
 		metricName := strings.ToLower(chi.URLParam(req, "name"))
 
-		supportedMTypes := []string{config.Counter, config.Gauge}
+		supportedMTypes := []string{enum.Counter, enum.Gauge}
 		if !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
@@ -57,7 +59,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 			return
 		}
 
-		res.Header().Set("Content-Type", config.TextPlain)
+		res.Header().Set("Content-Type", enum.TextPlain)
 		res.WriteHeader(http.StatusOK)
 		if _, err := res.Write(data); err != nil {
 			panic(err)
@@ -65,7 +67,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 	}
 }
 
-func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			res.WriteHeader(http.StatusMethodNotAllowed)
@@ -73,7 +75,7 @@ func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Requ
 		}
 
 		// TODO: chi.URLParam
-		urlPath := strings.TrimLeft(req.RequestURI, config.ServerHost+config.ServerPort)
+		urlPath := strings.TrimLeft(req.RequestURI, c.Server.Host+c.Server.Port)
 		urlParams := strings.Split(urlPath, "/")
 		if len(urlParams) != 4 {
 			return
@@ -88,8 +90,8 @@ func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Requ
 			return
 		}
 
-		supportedMTypes := []string{config.Counter, config.Gauge}
-		if req.Header.Get("Content-Type") != config.TextPlain || !slices.Contains(supportedMTypes, metricType) {
+		supportedMTypes := []string{enum.Counter, enum.Gauge}
+		if req.Header.Get("Content-Type") != enum.TextPlain || !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -98,9 +100,9 @@ func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Requ
 		var err error
 
 		switch metricType {
-		case config.Counter:
+		case enum.Counter:
 			convMetricValue, err = strconv.ParseInt(metricValue, 0, 64)
-		case config.Gauge:
+		case enum.Gauge:
 			convMetricValue, err = strconv.ParseFloat(metricValue, 64)
 		}
 
@@ -109,7 +111,7 @@ func GetUpdateWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Requ
 			return
 		}
 
-		res.Header().Set("Content-Type", config.TextPlain)
+		res.Header().Set("Content-Type", enum.TextPlain)
 		res.WriteHeader(http.StatusOK)
 		s.UpdateMetricValue(metricName, convMetricValue)
 	}

@@ -1,62 +1,75 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"reflect"
-	"strings"
-	"time"
+    "fmt"
+    "log"
+    "reflect"
+    "strings"
+    "time"
 
-	"github.com/anatolev-max/metrics-tpl/internal/config"
-	"github.com/anatolev-max/metrics-tpl/internal/storage"
-	"github.com/go-resty/resty/v2"
+    . "github.com/anatolev-max/metrics-tpl/config"
+    "github.com/anatolev-max/metrics-tpl/internal/enum"
+    "github.com/anatolev-max/metrics-tpl/internal/storage"
+
+    "github.com/go-resty/resty/v2"
 )
 
-const pollInterval = 2
-const reportInterval = 10
-
 func main() {
-	if err := run(); err != nil {
-		panic(err)
-	}
+    c := NewConfig()
+    parseFlags(c)
+
+    if err := run(); err != nil {
+        panic(err)
+    }
 }
 
 func run() error {
-	s := storage.NewMemStorage()
+    s := storage.NewMemStorage()
+    fmt.Println("Running agent\nServer endpoint", options.flagRunAddr)
+    v := options.reportInterval % pollInterval
 
-	for {
-		s.UpdateAgentData()
-		if s.Counter[config.PollCounter]%(reportInterval/pollInterval) == 0 {
-			updateServerData(s)
-		}
+    var i int64 = 0
+    for {
+        s.UpdateAgentData()
+        i++
+        //fmt.Println(i % (options.reportInterval / pollInterval))
 
-		time.Sleep(pollInterval * time.Second)
-	}
+        if i%(options.reportInterval/pollInterval) == 0 {
+            if v != 0 {
+                //time.Sleep(v * time.Second)
+            }
+
+            updateServerData(s)
+            //fmt.Println("send")
+        }
+
+        time.Sleep(pollInterval * time.Second)
+    }
 }
 
 func updateServerData(s storage.MemStorage) {
-	sValue := reflect.ValueOf(s)
+    sValue := reflect.ValueOf(s)
 
-	for fieldIndex := 0; fieldIndex < sValue.NumField(); fieldIndex++ {
-		metricType := sValue.Type().Field(fieldIndex).Name
+    for fieldIndex := 0; fieldIndex < sValue.NumField(); fieldIndex++ {
+        metricType := sValue.Type().Field(fieldIndex).Name
 
-		iter := sValue.FieldByName(metricType).MapRange()
-		for iter.Next() {
-			metricType = strings.ToLower(metricType)
-			url := fmt.Sprintf(config.UpdateFullEndpoint+"%v/%v/%v", metricType, iter.Key(), iter.Value())
-			sendRequest(url)
-		}
-	}
+        iter := sValue.FieldByName(metricType).MapRange()
+        for iter.Next() {
+            metricType = strings.ToLower(metricType)
+            url := fmt.Sprintf(options.flagRunAddr+enum.UpdateEndpoint+"/%v/%v/%v", metricType, iter.Key(), iter.Value())
+            sendRequest(url)
+        }
+    }
 }
 
 func sendRequest(url string) {
-	client := resty.New()
+    client := resty.New()
 
-	_, err := client.R().
-		SetHeader("Content-Type", config.TextPlain).
-		Post(url)
+    _, err := client.R().
+        SetHeader("Content-Type", enum.TextPlain).
+        Post(url)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
+    if err != nil {
+        log.Fatalln(err)
+    }
 }

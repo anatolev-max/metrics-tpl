@@ -4,7 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/anatolev-max/metrics-tpl/internal/config"
+	"github.com/anatolev-max/metrics-tpl/internal/enum"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestMemStorage_UpdateAgentData(t *testing.T) {
 	storageGaugeCount := len(s.Gauge)
 
 	assert.Equal(t, storageGaugeCount, gaugeCount+myGaugeCount)
-	assert.Equal(t, int(s.Counter[config.PollCounter]), gaugeCount)
+	assert.Equal(t, int(s.Counter[enum.PollCounter]), gaugeCount)
 }
 
 func TestMemStorage_UpdateMetricValue(t *testing.T) {
