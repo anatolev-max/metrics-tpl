@@ -8,18 +8,18 @@ import (
 	"github.com/anatolev-max/metrics-tpl/config"
 )
 
-const pollInterval = 2
-const reportInterval int64 = 10
+const pollInterval uint = 2
+const reportInterval uint = 10
 
 var options struct {
 	flagRunAddr    string
-	reportInterval int64
+	reportInterval uint
 }
 
 func parseFlags(c config.Config) {
 	endpoint := c.Server.Host + c.Server.Port
 	flag.StringVar(&options.flagRunAddr, "a", endpoint, "address and port for sending http requests")
-	flag.Int64Var(&options.reportInterval, "r", reportInterval, "frequency of sending metrics to the server")
+	flag.UintVar(&options.reportInterval, "r", reportInterval, "frequency of sending metrics to the server")
 	flag.Parse()
 
 	validateFlags()
