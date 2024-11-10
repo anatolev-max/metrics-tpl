@@ -28,8 +28,8 @@ func run(c Config) error {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		router.Get("/", handlers.GetMainWebhook(s))
-		router.Get(enum.GetEndpoint+"/{type}/{name}", handlers.GetValueWebhook(s))
-		router.Post(enum.UpdateEndpoint+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(s, c))
+		router.Get(enum.GetEndpoint.String()+"/{type}/{name}", handlers.GetValueWebhook(s))
+		router.Post(enum.UpdateEndpoint.String()+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(s, c))
 	})
 
 	fmt.Println("Running server on", options.flagRunAddr)

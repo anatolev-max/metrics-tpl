@@ -55,10 +55,10 @@ type MemStorage struct {
 func NewMemStorage() MemStorage {
 	return MemStorage{
 		Counter: map[string]int64{
-			enum.PollCounter: 0,
+			enum.PollCounter.String(): 0,
 		},
 		Gauge: map[string]float64{
-			enum.RandomValue: 0,
+			enum.RandomValue.String(): 0,
 		},
 	}
 }
@@ -84,17 +84,17 @@ func (s *MemStorage) UpdateAgentData() {
 				s.Gauge[name] = vType
 			}
 
-			s.Counter[enum.PollCounter]++
+			s.Counter[enum.PollCounter.String()]++
 		}
 	}
 
-	s.Gauge[enum.RandomValue] = rand.Float64()
+	s.Gauge[enum.RandomValue.String()] = rand.Float64()
 }
 
 func (s *MemStorage) UpdateMetricValue(name string, value any) {
 	switch vType := value.(type) {
 	case int64:
-		if _, exist := s.Counter[name]; !exist || name == enum.PollCounter {
+		if _, exist := s.Counter[name]; !exist || name == enum.PollCounter.String() {
 			s.Counter[name] = vType
 		} else {
 			s.Counter[name] += vType

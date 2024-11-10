@@ -76,7 +76,7 @@ func reportData(s storage.MemStorage) {
 		iter := sValue.FieldByName(metricType).MapRange()
 		for iter.Next() {
 			metricType = strings.ToLower(metricType)
-			url := fmt.Sprintf(options.flagRunAddr+enum.UpdateEndpoint+"/%v/%v/%v", metricType, iter.Key(), iter.Value())
+			url := fmt.Sprintf(options.flagRunAddr+enum.UpdateEndpoint.String()+"/%v/%v/%v", metricType, iter.Key(), iter.Value())
 			sendRequest(url)
 		}
 	}
@@ -86,7 +86,7 @@ func sendRequest(url string) {
 	client := resty.New()
 
 	_, err := client.R().
-		SetHeader("Content-Type", enum.TextPlain).
+		SetHeader("Content-Type", enum.TextPlain.String()).
 		Post(url)
 
 	if err != nil {

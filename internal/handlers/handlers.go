@@ -35,7 +35,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 		metricType := strings.ToLower(chi.URLParam(req, "type"))
 		metricName := strings.ToLower(chi.URLParam(req, "name"))
 
-		supportedMTypes := []string{enum.Counter, enum.Gauge}
+		supportedMTypes := []string{enum.Counter.String(), enum.Gauge.String()}
 		if !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
@@ -59,7 +59,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 			return
 		}
 
-		res.Header().Set("Content-Type", enum.TextPlain)
+		res.Header().Set("Content-Type", enum.TextPlain.String())
 		res.WriteHeader(http.StatusOK)
 		if _, err := res.Write(data); err != nil {
 			panic(err)
@@ -90,8 +90,8 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 			return
 		}
 
-		supportedMTypes := []string{enum.Counter, enum.Gauge}
-		if req.Header.Get("Content-Type") != enum.TextPlain || !slices.Contains(supportedMTypes, metricType) {
+		supportedMTypes := []string{enum.Counter.String(), enum.Gauge.String()}
+		if req.Header.Get("Content-Type") != enum.TextPlain.String() || !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -100,9 +100,9 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 		var err error
 
 		switch metricType {
-		case enum.Counter:
+		case enum.Counter.String():
 			convMetricValue, err = strconv.ParseInt(metricValue, 0, 64)
-		case enum.Gauge:
+		case enum.Gauge.String():
 			convMetricValue, err = strconv.ParseFloat(metricValue, 64)
 		}
 
@@ -111,7 +111,7 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 			return
 		}
 
-		res.Header().Set("Content-Type", enum.TextPlain)
+		res.Header().Set("Content-Type", enum.TextPlain.String())
 		res.WriteHeader(http.StatusOK)
 		s.UpdateMetricValue(metricName, convMetricValue)
 	}

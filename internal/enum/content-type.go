@@ -1,4 +1,19 @@
 package enum
 
-const ApplicationJson string = "application/json"
-const TextPlain string = "text/plain"
+type ContentType int
+
+const (
+	ApplicationJson ContentType = iota + 1
+	TextPlain
+)
+
+func (c ContentType) String() string {
+	return [...]string{
+		"application/json",
+		"text/plain",
+	}[c-1]
+}
+
+func (c ContentType) EnumIndex() int {
+	return int(c)
+}
