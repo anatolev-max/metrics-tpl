@@ -75,7 +75,7 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 		}
 
 		// TODO: chi.URLParam
-		urlPath := strings.TrimLeft(req.RequestURI, c.Server.Host+c.Server.Port)
+		urlPath := strings.TrimLeft(req.RequestURI, c.Server.Schema+c.Server.Host+c.Server.Port)
 		urlParams := strings.Split(urlPath, "/")
 		if len(urlParams) != 4 {
 			return
@@ -91,7 +91,11 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 		}
 
 		supportedMTypes := []string{enum.Counter.String(), enum.Gauge.String()}
-		if req.Header.Get("Content-Type") != enum.TextPlain.String() || !slices.Contains(supportedMTypes, metricType) {
+		if req.Header.Get("Content-Type") != enum.TextPlain.String() {
+			//res.WriteHeader(http.StatusBadRequest)
+			//return
+		}
+		if !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}

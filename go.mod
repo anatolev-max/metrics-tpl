@@ -1,6 +1,6 @@
 module github.com/anatolev-max/metrics-tpl
 
-go 1.23.1
+go 1.22.9
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0

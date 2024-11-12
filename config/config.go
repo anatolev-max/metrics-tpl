@@ -1,8 +1,9 @@
 package config
 
 type ServerConfig struct {
-	Host string
-	Port string
+	Host   string
+	Port   string
+	Schema string
 }
 
 type Config struct {
@@ -10,10 +11,12 @@ type Config struct {
 }
 
 func NewConfig() Config {
+	//goland:noinspection HttpUrlsUsage
 	return Config{
 		Server: ServerConfig{
-			Host: "http://localhost",
-			Port: ":8000",
+			Host:   "localhost",
+			Port:   ":8080",
+			Schema: "http://",
 		},
 	}
 }

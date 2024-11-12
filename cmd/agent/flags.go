@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/url"
+	"strings"
 
 	"github.com/anatolev-max/metrics-tpl/config"
 )
@@ -18,11 +19,15 @@ var options struct {
 }
 
 func parseFlags(c config.Config) {
-	endpoint := c.Server.Host + c.Server.Port
+	endpoint := c.Server.Schema + c.Server.Host + c.Server.Port
 	flag.StringVar(&options.flagRunAddr, "a", endpoint, "address and port for sending http requests")
 	flag.UintVar(&options.pollInterval, "p", pollInterval, "frequency of polling metrics from the runtime package")
 	flag.UintVar(&options.reportInterval, "r", reportInterval, "frequency of sending metrics to the server")
 	flag.Parse()
+
+	if !strings.Contains(options.flagRunAddr, c.Server.Schema) {
+		options.flagRunAddr = c.Server.Schema + options.flagRunAddr
+	}
 
 	validateFlags()
 }
