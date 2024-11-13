@@ -26,7 +26,7 @@ func main() {
 
 func run() error {
 	s := storage.NewMemStorage()
-	fmt.Println("Running agent\nServer endpoint", options.flagRunAddr)
+	fmt.Println("Running agent\nServer endpoint", options.runAddr)
 	intervals := []uint{options.pollInterval, options.reportInterval}
 	maxInterval := slices.Max(intervals)
 	minInterval := slices.Min(intervals)
@@ -48,7 +48,15 @@ func run() error {
 	}
 }
 
-func reportData(s storage.MemStorage) {
+func reportOrPoll(report bool, s storage.MemStorage) {
+	if report {
+		sendDataToServer(s)
+	} else {
+		s.UpdateAgentData()
+	}
+}
+
+func sendDataToServer(s storage.MemStorage) {
 	sValue := reflect.ValueOf(s)
 
 	for fieldIndex := 0; fieldIndex < sValue.NumField(); fieldIndex++ {
@@ -57,17 +65,9 @@ func reportData(s storage.MemStorage) {
 		iter := sValue.FieldByName(metricType).MapRange()
 		for iter.Next() {
 			metricType = strings.ToLower(metricType)
-			url := fmt.Sprintf(options.flagRunAddr+enum.UpdateEndpoint.String()+"/%v/%v/%v", metricType, iter.Key(), iter.Value())
+			url := fmt.Sprintf(options.runAddr+enum.UpdateEndpoint.String()+"/%v/%v/%v", metricType, iter.Key(), iter.Value())
 			sendRequest(url)
 		}
-	}
-}
-
-func reportOrPoll(report bool, s storage.MemStorage) {
-	if report {
-		reportData(s)
-	} else {
-		s.UpdateAgentData()
 	}
 }
 

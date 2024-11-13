@@ -91,16 +91,12 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 		}
 
 		supportedMTypes := []string{enum.Counter.String(), enum.Gauge.String()}
-		if req.Header.Get("Content-Type") != enum.TextPlain.String() {
-			//res.WriteHeader(http.StatusBadRequest)
-			//return
-		}
 		if !slices.Contains(supportedMTypes, metricType) {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		var convMetricValue interface{}
+		var convMetricValue any
 		var err error
 
 		switch metricType {

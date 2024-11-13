@@ -32,8 +32,8 @@ func run(c Config) error {
 		router.Post(enum.UpdateEndpoint.String()+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(s, c))
 	})
 
-	fmt.Println("Running server on", options.flagRunAddr)
-	url, _ := ParseRequestURI(options.flagRunAddr)
+	fmt.Println("Running server on", options.runAddr)
+	url, _ := ParseRequestURI(options.runAddr)
 
 	return http.ListenAndServe(":"+url.Port(), router)
 }

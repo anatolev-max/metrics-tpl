@@ -14,17 +14,17 @@ const pollInterval uint = 2
 const reportInterval uint = 10
 
 var options struct {
-	flagRunAddr    string
+	runAddr        string
 	pollInterval   uint
 	reportInterval uint
 }
 
 func parseFlags(c config.Config) {
 	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
-		options.flagRunAddr = envRunAddr
+		options.runAddr = envRunAddr
 	} else {
 		hp := c.Server.Host + c.Server.Port
-		flag.StringVar(&options.flagRunAddr, "a", hp, "address and port for sending http requests")
+		flag.StringVar(&options.runAddr, "a", hp, "address and port for sending http requests")
 	}
 
 	if envReportInterval := os.Getenv("REPORT_INTERVAL"); envReportInterval != "" {
@@ -42,13 +42,13 @@ func parseFlags(c config.Config) {
 	}
 
 	flag.Parse()
-	options.flagRunAddr = c.Server.Scheme + options.flagRunAddr
+	options.runAddr = c.Server.Scheme + options.runAddr
 
 	validateFlags()
 }
 
 func validateFlags() {
-	u, err := url.ParseRequestURI(options.flagRunAddr)
+	u, err := url.ParseRequestURI(options.runAddr)
 	if err != nil || u.Port() == "" || options.pollInterval < 1 || options.reportInterval < 1 {
 		log.Fatal("Error while parsing command line arguments")
 	}
