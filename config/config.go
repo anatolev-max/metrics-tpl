@@ -3,7 +3,7 @@ package config
 type ServerConfig struct {
 	Host   string
 	Port   string
-	Schema string
+	Scheme string
 }
 
 type Config struct {
@@ -16,7 +16,7 @@ func NewConfig() Config {
 		Server: ServerConfig{
 			Host:   "localhost",
 			Port:   ":8080",
-			Schema: "http://",
+			Scheme: "http://",
 		},
 	}
 }

@@ -4,7 +4,8 @@ import (
 	"flag"
 	"log"
 	"net/url"
-	"strings"
+	"os"
+	"strconv"
 
 	"github.com/anatolev-max/metrics-tpl/config"
 )
@@ -19,15 +20,29 @@ var options struct {
 }
 
 func parseFlags(c config.Config) {
-	endpoint := c.Server.Schema + c.Server.Host + c.Server.Port
-	flag.StringVar(&options.flagRunAddr, "a", endpoint, "address and port for sending http requests")
-	flag.UintVar(&options.pollInterval, "p", pollInterval, "frequency of polling metrics from the runtime package")
-	flag.UintVar(&options.reportInterval, "r", reportInterval, "frequency of sending metrics to the server")
-	flag.Parse()
-
-	if !strings.Contains(options.flagRunAddr, c.Server.Schema) {
-		options.flagRunAddr = c.Server.Schema + options.flagRunAddr
+	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
+		options.flagRunAddr = envRunAddr
+	} else {
+		hp := c.Server.Host + c.Server.Port
+		flag.StringVar(&options.flagRunAddr, "a", hp, "address and port for sending http requests")
 	}
+
+	if envReportInterval := os.Getenv("REPORT_INTERVAL"); envReportInterval != "" {
+		v, _ := strconv.ParseInt(envReportInterval, 10, 32)
+		options.reportInterval = uint(v)
+	} else {
+		flag.UintVar(&options.reportInterval, "r", reportInterval, "frequency of sending metrics to the server")
+	}
+
+	if envPollInterval := os.Getenv("POLL_INTERVAL"); envPollInterval != "" {
+		v, _ := strconv.ParseInt(envPollInterval, 10, 32)
+		options.pollInterval = uint(v)
+	} else {
+		flag.UintVar(&options.pollInterval, "p", pollInterval, "frequency of polling metrics from the runtime package")
+	}
+
+	flag.Parse()
+	options.flagRunAddr = c.Server.Scheme + options.flagRunAddr
 
 	validateFlags()
 }

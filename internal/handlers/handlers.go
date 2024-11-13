@@ -75,7 +75,7 @@ func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, 
 		}
 
 		// TODO: chi.URLParam
-		urlPath := strings.TrimLeft(req.RequestURI, c.Server.Schema+c.Server.Host+c.Server.Port)
+		urlPath := strings.TrimLeft(req.RequestURI, c.Server.Scheme+c.Server.Host+c.Server.Port)
 		urlParams := strings.Split(urlPath, "/")
 		if len(urlParams) != 4 {
 			return

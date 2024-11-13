@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/url"
-	"strings"
+	"os"
 
 	"github.com/anatolev-max/metrics-tpl/config"
 )
@@ -14,13 +14,15 @@ var options struct {
 }
 
 func parseFlags(c config.Config) {
-	endpoint := c.Server.Schema + c.Server.Host + c.Server.Port
-	flag.StringVar(&options.flagRunAddr, "a", endpoint, "address and port to run server")
-	flag.Parse()
-
-	if !strings.Contains(options.flagRunAddr, c.Server.Schema) {
-		options.flagRunAddr = c.Server.Schema + options.flagRunAddr
+	if envRunAddr := os.Getenv("ADDRESS"); envRunAddr != "" {
+		options.flagRunAddr = envRunAddr
+	} else {
+		hp := c.Server.Host + c.Server.Port
+		flag.StringVar(&options.flagRunAddr, "a", hp, "address and port to run server")
 	}
+
+	flag.Parse()
+	options.flagRunAddr = c.Server.Scheme + options.flagRunAddr
 
 	validateFlags()
 }
