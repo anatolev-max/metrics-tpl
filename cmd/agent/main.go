@@ -33,7 +33,7 @@ func run() error {
 	diff := maxInterval % minInterval
 	reportFirst := options.reportInterval > options.pollInterval
 
-	var i uint = 0
+	var i uint
 	for {
 		i++
 		sleep(minInterval)
@@ -48,7 +48,7 @@ func run() error {
 	}
 }
 
-func reportOrPoll(report bool, s storage.MemStorage) {
+func reportOrPoll(report bool, s *storage.MemStorage) {
 	if report {
 		sendDataToServer(s)
 	} else {
@@ -56,8 +56,8 @@ func reportOrPoll(report bool, s storage.MemStorage) {
 	}
 }
 
-func sendDataToServer(s storage.MemStorage) {
-	sValue := reflect.ValueOf(s)
+func sendDataToServer(s *storage.MemStorage) {
+	sValue := reflect.ValueOf(s).Elem()
 
 	for fieldIndex := 0; fieldIndex < sValue.NumField(); fieldIndex++ {
 		metricType := sValue.Type().Field(fieldIndex).Name

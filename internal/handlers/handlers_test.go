@@ -100,6 +100,7 @@ func TestGetWebHook(t *testing.T) {
 
 	for _, tc := range testCases {
 		s := storage.NewMemStorage()
+		h := NewHTTPHandler(s)
 		c := NewConfig()
 
 		t.Run(tc.name, func(t *testing.T) {
@@ -116,7 +117,7 @@ func TestGetWebHook(t *testing.T) {
 			request.Header.Add("Content-Type", tc.contentType)
 			writer := httptest.NewRecorder()
 
-			handler := GetUpdateWebhook(s, c)
+			handler := h.GetUpdateWebhook(c)
 			handler(writer, request)
 
 			assert.Equal(t, tc.expectedCode, writer.Code, "The response code does not match what is expected")

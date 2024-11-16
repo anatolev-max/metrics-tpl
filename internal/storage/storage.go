@@ -52,8 +52,8 @@ type MemStorage struct {
 	Gauge   map[string]float64
 }
 
-func NewMemStorage() MemStorage {
-	return MemStorage{
+func NewMemStorage() *MemStorage {
+	return &MemStorage{
 		Counter: map[string]int64{
 			enum.PollCounter.String(): 0,
 		},

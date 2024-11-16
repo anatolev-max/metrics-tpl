@@ -24,12 +24,13 @@ func main() {
 
 func run(c config.Config) error {
 	s := storage.NewMemStorage()
+	h := handlers.NewHTTPHandler(s)
 
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
-		router.Get("/", handlers.GetMainWebhook(s))
-		router.Get(enum.GetEndpoint.String()+"/{type}/{name}", handlers.GetValueWebhook(s))
-		router.Post(enum.UpdateEndpoint.String()+"/{type}/{name}/{value}", handlers.GetUpdateWebhook(s, c))
+		router.Get("/", h.GetMainWebhook())
+		router.Get(enum.GetEndpoint.String()+"/{type}/{name}", h.GetValueWebhook())
+		router.Post(enum.UpdateEndpoint.String()+"/{type}/{name}/{value}", h.GetUpdateWebhook(c))
 	})
 
 	fmt.Println("Running server on", options.runAddr)

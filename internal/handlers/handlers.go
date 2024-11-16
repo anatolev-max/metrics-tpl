@@ -16,15 +16,31 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func GetMainWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+type Webhook interface {
+	GetMainWebhook() func(http.ResponseWriter, *http.Request)
+	GetValueWebhook() func(http.ResponseWriter, *http.Request)
+	GetUpdateWebhook(c config.Config) func(http.ResponseWriter, *http.Request)
+}
+
+type HTTPHandler struct {
+	memStorage *storage.MemStorage
+}
+
+func NewHTTPHandler(s *storage.MemStorage) *HTTPHandler {
+	return &HTTPHandler{
+		memStorage: s,
+	}
+}
+
+func (h *HTTPHandler) GetMainWebhook() func(http.ResponseWriter, *http.Request) {
 	return render.IncludeTemplate("index.html", map[string]any{
 		"Title":    "Metrics-tpl",
-		"Counters": s.Counter,
-		"Gauges":   s.Gauge,
+		"Counters": h.memStorage.Counter,
+		"Gauges":   h.memStorage.Gauge,
 	})
 }
 
-func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Request) {
+func (h *HTTPHandler) GetValueWebhook() func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet {
 			res.WriteHeader(http.StatusMethodNotAllowed)
@@ -41,7 +57,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 			return
 		}
 
-		msVal := reflect.ValueOf(s)
+		msVal := reflect.ValueOf(h.memStorage).Elem()
 
 		for fieldIndex := 0; fieldIndex < msVal.NumField(); fieldIndex++ {
 			if field := msVal.Type().Field(fieldIndex).Name; strings.ToLower(field) == metricType {
@@ -67,7 +83,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 	}
 }
 
-func GetUpdateWebhook(s storage.MemStorage, c config.Config) func(http.ResponseWriter, *http.Request) {
+func (h *HTTPHandler) GetUpdateWebhook(c config.Config) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			res.WriteHeader(http.StatusMethodNotAllowed)
@@ -113,6 +129,6 @@ func GetUpdateWebhook(s storage.MemStorage, c config.Config) func(http.ResponseW
 
 		res.Header().Set("Content-Type", enum.TextPlain.String())
 		res.WriteHeader(http.StatusOK)
-		s.UpdateMetricValue(metricName, convMetricValue)
+		h.memStorage.UpdateMetricValue(metricName, convMetricValue)
 	}
 }
