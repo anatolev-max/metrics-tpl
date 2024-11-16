@@ -3,7 +3,7 @@ package enum
 type ContentType int
 
 const (
-	ApplicationJson ContentType = iota + 1
+	ApplicationJSON ContentType = iota + 1
 	TextPlain
 )
 

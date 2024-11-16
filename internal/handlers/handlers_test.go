@@ -55,7 +55,7 @@ func TestGetWebHook(t *testing.T) {
 		//	name:         "test #4 - unsupported Content-Type",
 		//	method:       http.MethodPost,
 		//	expectedCode: http.StatusBadRequest,
-		//	contentType:  enum.ApplicationJson.String(),
+		//	contentType:  enum.ApplicationJSON.String(),
 		//	metricType:   enum.Counter.String(),
 		//	metricName:   "Go",
 		//	metricValue:  123,

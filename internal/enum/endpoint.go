@@ -1,19 +1,19 @@
 package enum
 
-type HttpEndpoint int
+type HTTPEndpoint int
 
 const (
-    GetEndpoint HttpEndpoint = iota + 1
-    UpdateEndpoint
+	GetEndpoint HTTPEndpoint = iota + 1
+	UpdateEndpoint
 )
 
-func (h HttpEndpoint) String() string {
-    return [...]string{
-        "/value",
-        "/update",
-    }[h-1]
+func (h HTTPEndpoint) String() string {
+	return [...]string{
+		"/value",
+		"/update",
+	}[h-1]
 }
 
-func (h HttpEndpoint) EnumIndex() int {
-    return int(h)
+func (h HTTPEndpoint) EnumIndex() int {
+	return int(h)
 }

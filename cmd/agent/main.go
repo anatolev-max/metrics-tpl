@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/anatolev-max/metrics-tpl/config"
+	"github.com/anatolev-max/metrics-tpl/config"
 	"github.com/anatolev-max/metrics-tpl/internal/enum"
 	"github.com/anatolev-max/metrics-tpl/internal/storage"
 
@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	c := NewConfig()
+	c := config.NewConfig()
 	parseFlags(c)
 
 	if err := run(); err != nil {

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/anatolev-max/metrics-tpl/config"
+	"github.com/anatolev-max/metrics-tpl/config"
 	"github.com/anatolev-max/metrics-tpl/internal/enum"
 	"github.com/anatolev-max/metrics-tpl/internal/render"
 	"github.com/anatolev-max/metrics-tpl/internal/storage"
@@ -67,7 +67,7 @@ func GetValueWebhook(s storage.MemStorage) func(http.ResponseWriter, *http.Reque
 	}
 }
 
-func GetUpdateWebhook(s storage.MemStorage, c Config) func(http.ResponseWriter, *http.Request) {
+func GetUpdateWebhook(s storage.MemStorage, c config.Config) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			res.WriteHeader(http.StatusMethodNotAllowed)

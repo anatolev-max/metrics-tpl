@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	. "net/url"
+	"net/url"
 
-	. "github.com/anatolev-max/metrics-tpl/config"
+	"github.com/anatolev-max/metrics-tpl/config"
 	"github.com/anatolev-max/metrics-tpl/internal/enum"
 	"github.com/anatolev-max/metrics-tpl/internal/handlers"
 	"github.com/anatolev-max/metrics-tpl/internal/storage"
@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	c := NewConfig()
+	c := config.NewConfig()
 	parseFlags(c)
 
 	if err := run(c); err != nil {
@@ -22,7 +22,7 @@ func main() {
 	}
 }
 
-func run(c Config) error {
+func run(c config.Config) error {
 	s := storage.NewMemStorage()
 
 	router := chi.NewRouter()
@@ -33,7 +33,7 @@ func run(c Config) error {
 	})
 
 	fmt.Println("Running server on", options.runAddr)
-	url, _ := ParseRequestURI(options.runAddr)
+	u, _ := url.ParseRequestURI(options.runAddr)
 
-	return http.ListenAndServe(":"+url.Port(), router)
+	return http.ListenAndServe(":"+u.Port(), router)
 }
