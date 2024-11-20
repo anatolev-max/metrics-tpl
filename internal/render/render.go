@@ -13,10 +13,10 @@ func check(fMessage string, err error) {
 	}
 }
 
-func IncludeTemplate(path string, data map[string]any) func(res http.ResponseWriter, _ *http.Request) {
+func IncludeTemplate(path string, data map[string]any) http.HandlerFunc {
 	const basePath = "./web/templates/"
 
-	return func(res http.ResponseWriter, _ *http.Request) {
+	return http.HandlerFunc(func(res http.ResponseWriter, _ *http.Request) {
 		tLayout, err := template.ParseFiles(basePath + "layout/main.html")
 		check("Error while parsing layout file: %v", err)
 
@@ -37,5 +37,5 @@ func IncludeTemplate(path string, data map[string]any) func(res http.ResponseWri
 
 		err = tLayout.Execute(res, layoutData)
 		check("Error while executing layout template: %v", err)
-	}
+	})
 }

@@ -17,9 +17,9 @@ import (
 )
 
 type Webhook interface {
-	GetMainWebhook() func(http.ResponseWriter, *http.Request)
-	GetValueWebhook() func(http.ResponseWriter, *http.Request)
-	GetUpdateWebhook(c config.Config) func(http.ResponseWriter, *http.Request)
+	GetMainWebhook() http.Handler
+	GetValueWebhook() http.Handler
+	GetUpdateWebhook(c config.Config) http.Handler
 }
 
 type HTTPHandler struct {
@@ -32,7 +32,7 @@ func NewHTTPHandler(s *storage.MemStorage) *HTTPHandler {
 	}
 }
 
-func (h *HTTPHandler) GetMainWebhook() func(http.ResponseWriter, *http.Request) {
+func (h *HTTPHandler) GetMainWebhook() http.HandlerFunc {
 	return render.IncludeTemplate("index.html", map[string]any{
 		"Title":    "Metrics-tpl",
 		"Counters": h.memStorage.Counter,
@@ -40,8 +40,8 @@ func (h *HTTPHandler) GetMainWebhook() func(http.ResponseWriter, *http.Request) 
 	})
 }
 
-func (h *HTTPHandler) GetValueWebhook() func(http.ResponseWriter, *http.Request) {
-	return func(res http.ResponseWriter, req *http.Request) {
+func (h *HTTPHandler) GetValueWebhook() http.HandlerFunc {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet {
 			res.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -80,11 +80,11 @@ func (h *HTTPHandler) GetValueWebhook() func(http.ResponseWriter, *http.Request)
 		if _, err := res.Write(data); err != nil {
 			panic(err)
 		}
-	}
+	})
 }
 
-func (h *HTTPHandler) GetUpdateWebhook(c config.Config) func(http.ResponseWriter, *http.Request) {
-	return func(res http.ResponseWriter, req *http.Request) {
+func (h *HTTPHandler) GetUpdateWebhook(c config.Config) http.HandlerFunc {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			res.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -130,5 +130,5 @@ func (h *HTTPHandler) GetUpdateWebhook(c config.Config) func(http.ResponseWriter
 		res.Header().Set("Content-Type", enum.TextPlain.String())
 		res.WriteHeader(http.StatusOK)
 		h.memStorage.UpdateMetricValue(metricName, convMetricValue)
-	}
+	})
 }
