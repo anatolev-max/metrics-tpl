@@ -1,0 +1,9 @@
+<ul>
+    {{range $k, $v := .Counters}}
+        <li>{{ $k }} - {{ $v }}</li>
+    {{end}}
+
+    {{range $k, $v := .Gauges}}
+        <li>{{ $k }} - {{ $v }}</li>
+    {{end}}
+</ul>
