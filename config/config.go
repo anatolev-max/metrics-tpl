@@ -1,5 +1,7 @@
 package config
 
+import "go.uber.org/zap/zapcore"
+
 type ServerConfig struct {
 	Host   string
 	Port   string
@@ -7,7 +9,8 @@ type ServerConfig struct {
 }
 
 type Config struct {
-	Server ServerConfig
+	Server   ServerConfig
+	LogLevel string
 }
 
 func NewConfig() Config {
@@ -18,5 +21,6 @@ func NewConfig() Config {
 			Port:   ":8080",
 			Scheme: "http://",
 		},
+		LogLevel: zapcore.InfoLevel.String(),
 	}
 }

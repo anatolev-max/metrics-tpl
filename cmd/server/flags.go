@@ -10,7 +10,8 @@ import (
 )
 
 var options struct {
-	runAddr string
+	runAddr  string
+	logLevel string
 }
 
 func parseFlags(c config.Config) {
@@ -19,6 +20,12 @@ func parseFlags(c config.Config) {
 	} else {
 		hp := c.Server.Host + c.Server.Port
 		flag.StringVar(&options.runAddr, "a", hp, "address and port to run server")
+	}
+
+	if envLogLevel := os.Getenv("LOG_LEVEL"); envLogLevel != "" {
+		options.logLevel = envLogLevel
+	} else {
+		flag.StringVar(&options.logLevel, "l", c.LogLevel, "log level")
 	}
 
 	flag.Parse()
